@@ -9,7 +9,7 @@ const Card = () => {
         Nice to meet u,<br />Devduel
       </div>
       <div className="w-full h-full items-center justify-center flex uppercase text-3xl">
-        hover me
+        Devduel
       </div>
     </div>
   );
