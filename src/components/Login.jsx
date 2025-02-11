@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 
@@ -8,7 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,7 +31,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(data));
       // Handle successful login, e.g., save token, redirect to dashboard
       console.log('Login successful:', data);
-      history.push('/dashboard'); // Redirect to dashboard or another page
+      navigate('/dashboard'); // Redirect to dashboard or another page
     } catch (error) {
       console.error('Error logging in:', error);
       setError('Invalid username or password');
