@@ -1,38 +1,105 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Split from 'react-split';
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/python/python';
+import 'codemirror/mode/clike/clike'; // Java mode is included in clike
 
-const Problems = () => {
-  const [problems, setProblems] = useState([]);
+const Testcase = () => {
+  const { id } = useParams(); // Get the problem ID from the URL
+  const navigate = useNavigate(); // Initialize useNavigate
+  const [code, setCode] = useState(''); // Initial value set to an empty string
+  const [language, setLanguage] = useState('javascript');
+  const [selectedCase, setSelectedCase] = useState(null);
+  const [problemDetails, setProblemDetails] = useState({
+    title: '',
+    description: '',
+    examples: [],
+    testcases: [],
+    difficulty: '',
+  });
   const [loading, setLoading] = useState(true);
+  const [output, setOutput] = useState(''); // State to store the output from the backend
 
   useEffect(() => {
-    // Fetch problems from the backend
-    const fetchProblems = async () => {
+    // Fetch problem details from the backend
+    const fetchProblemDetails = async () => {
       try {
-        const response = await fetch('/api/problems');
+        const response = await fetch(`/api/problems/${id}`);
         const data = await response.json();
-        setProblems(data);
+        setProblemDetails({
+          title: data.title,
+          description: data.description,
+          examples: data.examples,
+          testcases: data.testcases,
+          difficulty: data.difficulty,
+        });
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching problems:', error);
+        console.error('Error fetching problem details:', error);
         setLoading(false);
       }
     };
 
-    fetchProblems();
-  }, []);
+    fetchProblemDetails();
+  }, [id]);
 
-  const handleSolvedChange = (index) => {
-    const newProblems = [...problems];
-    newProblems[index].solved = !newProblems[index].solved;
-    setProblems(newProblems);
+  useEffect(() => {
+    // Fetch boilerplate code from the backend
+    const fetchBoilerplateCode = async () => {
+      try {
+        const response = await fetch(`/api/boilerplate/${language}`);
+        const data = await response.json();
+        setCode(data.boilerplate);
+      } catch (error) {
+        console.error('Error fetching boilerplate code:', error);
+      }
+    };
+
+    fetchBoilerplateCode();
+  }, [language]);
+
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`/api/submit/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code, language }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Code submission failed');
+      }
+
+      const data = await response.json();
+      setOutput(data.output); // Update the output state with the response from the backend
+      console.log('Code submitted successfully:', data);
+    } catch (error) {
+      console.error('Error submitting code:', error);
+    }
+  };
+
+  const handleCaseClick = (caseNumber) => {
+    setSelectedCase(caseNumber);
+  };
+
+  const handleCodeChange = (e) => {
+    setCode(e.target.value);
   };
 
   return (
-    <div className="container mx-auto p-4 h-screen" style={{ fontFamily: 'sans-serif' }}>
-      <h1 className="text-2xl font-bold mb-4 text-white">Problems</h1>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4" style={{ fontFamily: 'sans-serif' }}>
       {loading ? (
         <Box sx={{ width: 300 }}>
           <Skeleton />
@@ -40,54 +107,108 @@ const Problems = () => {
           <Skeleton animation={false} />
         </Box>
       ) : (
-        <>
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search problems..."
-              className="border rounded-md py-2 px-4 mr-2"
-            />
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
-              Search
-            </button>
+        <Split className="flex h-full" sizes={[50, 50]} minSize={200} gutterSize={10}>
+          {/* First Div */}
+          <div className="h-full p-4 bg-zinc-800 rounded-lg">
+            {/* Navbar */}
+            <div className="flex justify-between items-center mb-4 bg-gray-700 p-2 rounded-lg">
+              <h2 className="text-xl font-bold">Description</h2>
+            </div>
+            {/* Problem Heading */}
+            <h2 className="text-2xl font-bold mb-2">{problemDetails.title} (ID: {id})</h2>
+            {/* Problem Type */}
+            <span className="inline-block px-3 py-1 text-sm font-semibold text-white bg-blue-500 rounded-full mb-4">{problemDetails.difficulty}</span>
+            {/* Problem Description */}
+            <p className="mb-4">{problemDetails.description}</p>
+            {/* Examples Section */}
+            {problemDetails.examples.map((example, index) => (
+              <div key={index} className="mb-4">
+                <h3 className="text-xl font-bold mb-2">Example {index + 1}</h3>
+                <h4 className="text-lg font-semibold">Input:</h4>
+                <p>{example.input}</p>
+                <h4 className="text-lg font-semibold">Output:</h4>
+                <p>{example.output}</p>
+              </div>
+            ))}
           </div>
-          <div className="overflow-x-auto">
-            <table className="table-auto w-full max-w-6xl mx-auto text-white border border-white ml-2">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 bg-blue-700 w-1/2 text-left">Name</th>
-                  <th className="px-6 py-3 bg-blue-700 text-left">Difficulty</th>
-                  <th className="px-6 py-3 bg-blue-700 text-left">Status</th>
-                  <th className="px-6 py-3 bg-blue-700 text-left">Solved</th>
-                </tr>
-              </thead>
-              <tbody>
-                {problems.map((problem, index) => (
-                  <tr key={index} className="hover:bg-gray-800">
-                    <td className="px-6 py-3 w-1/2 text-left">
-                      <Link to={`/problems/${problem.id}`} className="nav-item cursor-pointer text-white no-underline">
-                        {problem.name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-3 text-left">{problem.difficulty}</td>
-                    <td className="px-6 py-3 text-left">{problem.status}</td>
-                    <td className="px-6 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={problem.solved}
-                        onChange={() => handleSolvedChange(index)}
-                        className="form-checkbox h-5 w-5 text-blue-600"
-                      />
-                    </td>
-                  </tr>
+
+          {/* Right Panel */}
+          <Split direction="vertical" className="flex-1 h-full" sizes={[30, 70]} minSize={100} gutterSize={10}>
+            {/* Second Div */}
+            <div className="p-4 bg-zinc-800 rounded-lg overflow-y-auto" style={{ maxHeight: '50vh' }}>
+              <div className="flex justify-between items-center mb-2">
+                <select
+                  value={language}
+                  onChange={handleLanguageChange}
+                  className="p-2 bg-gray-700 text-white rounded-md"
+                >
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+              
+                </select>
+                <button
+                  onClick={handleSubmit}
+                  className="p-2 bg-blue-500 text-white rounded-lg"
+                >
+                  Submit
+                </button>
+              </div>
+              <div style={{ height: '200px' }}>
+                <textarea
+                  value={code}
+                  onChange={handleCodeChange}
+                  className="w-full h-full p-2 bg-gray-700 text-white rounded-md"
+                  placeholder="Write your code here..."
+                  style={{ resize: 'none' }}
+                />
+              </div>
+            </div>
+
+            {/* Third Div */}
+            <div className="p-4 bg-zinc-800 rounded-lg" style={{ height: 'calc(100% - 200px)' }}>
+              <div className="bg-gray-700 p-2 rounded-t-lg">
+                <h2 className="text-xl font-bold">Testcase</h2>
+              </div>
+              <div className="p-4">
+                {problemDetails.testcases.map((testcase, index) => (
+                  <button
+                    key={index}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-full mb-2"
+                    onClick={() => handleCaseClick(index + 1)}
+                  >
+                    Case {index + 1}
+                  </button>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+                {selectedCase && (
+                  <>
+                    <h3 className="text-xl font-bold mb-2">Nums</h3>
+                    <input
+                      type="text"
+                      placeholder="nums"
+                      className="w-full p-2 mb-2 bg-gray-700 text-white rounded-md"
+                    />
+                    <h3 className="text-xl font-bold mb-2">Tags</h3>
+                    <input
+                      type="text"
+                      placeholder="tags"
+                      className="w-full p-2 bg-gray-700 text-white rounded-md"
+                    />
+                  </>
+                )}
+              </div>
+              {/* Output Section */}
+              {output && (
+                <div className="bg-gray-700 p-4 rounded-lg mt-4">
+                  <h3 className="text-xl font-bold mb-2">Output</h3>
+                  <pre className="bg-gray-800 p-2 rounded-md text-white">{output}</pre>
+                </div>
+              )}
+            </div>
+          </Split>
+        </Split>
       )}
     </div>
   );
 };
 
-export default Problems;
+export default Testcase;
