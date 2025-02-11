@@ -1,15 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 
 const Problems = () => {
-  const [problems, setProblems] = useState([
-    { id: 1, name: "Problem 1", difficulty: "Easy", status: "Open", solved: false },
-    { id: 2, name: "Problem 2", difficulty: "Medium", status: "Open", solved: false },
-    { id: 3, name: "Problem 3", difficulty: "Hard", status: "Closed", solved: false },
-  ]);
-  const [loading, setLoading] = useState(false);
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch problems from the backend
+    const fetchProblems = async () => {
+      try {
+        const response = await fetch('/api/problems');
+        const data = await response.json();
+        setProblems(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching problems:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchProblems();
+  }, []);
 
   const handleSolvedChange = (index) => {
     const newProblems = [...problems];
