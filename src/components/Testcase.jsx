@@ -18,9 +18,11 @@ const Testcase = () => {
   const [problemDetails, setProblemDetails] = useState({
     title: '',
     description: '',
-    examples: [],
-    testcases: [],
-    difficulty: '',
+    functionName: '',
+    returnType: '',
+    parameters: [],
+    testCases: [],
+    userBoilerplate: '',
   });
   const [loading, setLoading] = useState(true);
   const [output, setOutput] = useState(''); // State to store the output from the backend
@@ -34,10 +36,13 @@ const Testcase = () => {
         setProblemDetails({
           title: data.title,
           description: data.description,
-          examples: data.examples,
-          testcases: data.testcases,
-          difficulty: data.difficulty,
+          functionName: data.functionName,
+          returnType: data.returnType,
+          parameters: data.parameters,
+          testCases: data.testCases,
+          userBoilerplate: data.userBoilerplate,
         });
+        setCode(data.userBoilerplate); // Set the initial code to the user boilerplate
         setLoading(false);
       } catch (error) {
         console.error('Error fetching problem details:', error);
@@ -47,21 +52,6 @@ const Testcase = () => {
 
     fetchProblemDetails();
   }, [id]);
-
-  useEffect(() => {
-    // Fetch boilerplate code from the backend
-    const fetchBoilerplateCode = async () => {
-      try {
-        const response = await fetch(`/api/boilerplate/${language}`);
-        const data = await response.json();
-        setCode(data.boilerplate);
-      } catch (error) {
-        console.error('Error fetching boilerplate code:', error);
-      }
-    };
-
-    fetchBoilerplateCode();
-  }, [language]);
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
@@ -116,20 +106,26 @@ const Testcase = () => {
             </div>
             {/* Problem Heading */}
             <h2 className="text-2xl font-bold mb-2">{problemDetails.title} (ID: {id})</h2>
-            {/* Problem Type */}
-            <span className="inline-block px-3 py-1 text-sm font-semibold text-white bg-blue-500 rounded-full mb-4">{problemDetails.difficulty}</span>
             {/* Problem Description */}
             <p className="mb-4">{problemDetails.description}</p>
-            {/* Examples Section */}
-            {problemDetails.examples.map((example, index) => (
-              <div key={index} className="mb-4">
-                <h3 className="text-xl font-bold mb-2">Example {index + 1}</h3>
-                <h4 className="text-lg font-semibold">Input:</h4>
-                <p>{example.input}</p>
-                <h4 className="text-lg font-semibold">Output:</h4>
-                <p>{example.output}</p>
-              </div>
-            ))}
+            {/* Function Name */}
+            <p className="mb-4"><strong>Function Name:</strong> {problemDetails.functionName}</p>
+            {/* Return Type */}
+            <p className="mb-4"><strong>Return Type:</strong> {problemDetails.returnType}</p>
+            {/* Parameters */}
+            <p className="mb-4"><strong>Parameters:</strong></p>
+            <ul className="mb-4">
+              {problemDetails.parameters.map((param, index) => (
+                <li key={index}>{param.name} ({param.type})</li>
+              ))}
+            </ul>
+            {/* Test Cases */}
+            <p className="mb-4"><strong>Test Cases:</strong></p>
+            <ul className="mb-4">
+              {problemDetails.testCases.map((testCase, index) => (
+                <li key={index}>Input: {testCase.input}, Output: {testCase.output}</li>
+              ))}
+            </ul>
           </div>
 
           {/* Right Panel */}
@@ -144,7 +140,7 @@ const Testcase = () => {
                 >
                   <option value="javascript">JavaScript</option>
                   <option value="python">Python</option>
-              
+                  
                 </select>
                 <button
                   onClick={handleSubmit}
@@ -170,7 +166,7 @@ const Testcase = () => {
                 <h2 className="text-xl font-bold">Testcase</h2>
               </div>
               <div className="p-4">
-                {problemDetails.testcases.map((testcase, index) => (
+                {problemDetails.testCases.map((testcase, index) => (
                   <button
                     key={index}
                     className="px-4 py-2 bg-blue-500 text-white rounded-full mb-2"
