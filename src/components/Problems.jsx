@@ -12,6 +12,9 @@ const Problems = () => {
     const fetchProblems = async () => {
       try {
         const response = await fetch('/api/problems');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         setProblems(data);
         setLoading(false);
@@ -56,8 +59,6 @@ const Problems = () => {
               <thead>
                 <tr>
                   <th className="px-6 py-3 bg-blue-700 w-1/2 text-left">Name</th>
-                  <th className="px-6 py-3 bg-blue-700 text-left">Difficulty</th>
-                  <th className="px-6 py-3 bg-blue-700 text-left">Status</th>
                   <th className="px-6 py-3 bg-blue-700 text-left">Solved</th>
                 </tr>
               </thead>
@@ -66,11 +67,9 @@ const Problems = () => {
                   <tr key={index} className="hover:bg-gray-800">
                     <td className="px-6 py-3 w-1/2 text-left">
                       <Link to={`/problems/${problem.id}`} className="nav-item cursor-pointer text-white no-underline">
-                        {problem.name}
+                        {problem.title}
                       </Link>
                     </td>
-                    <td className="px-6 py-3 text-left">{problem.difficulty}</td>
-                    <td className="px-6 py-3 text-left">{problem.status}</td>
                     <td className="px-6 py-3 text-center">
                       <input
                         type="checkbox"
