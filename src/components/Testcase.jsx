@@ -122,7 +122,7 @@ const Testcase = () => {
             {/* Test Cases */}
             <p className="mb-4"><strong>Test Cases:</strong></p>
             <ul className="mb-4">
-              {problemDetails.testCases.map((testCase, index) => (
+              {problemDetails.testCases && problemDetails.testCases.map((testCase, index) => (
                 <li key={index}>Input: {testCase.input}, Output: {testCase.output}</li>
               ))}
             </ul>
@@ -166,7 +166,7 @@ const Testcase = () => {
                 <h2 className="text-xl font-bold">Testcase</h2>
               </div>
               <div className="p-4">
-                {problemDetails.testCases.map((testcase, index) => (
+                {problemDetails.testCases && problemDetails.testCases.map((testcase, index) => (
                   <button
                     key={index}
                     className="px-4 py-2 bg-blue-500 text-white rounded-full mb-2"
