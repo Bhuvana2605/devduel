@@ -6,13 +6,36 @@ const Admin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (username === "admin" && password === "1234") {
-      setIsAuthenticated(true);
-    } else {
-      alert("Invalid credentials");
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+
+      const data = await response.json();
+      if (data.isAuthenticated) {
+        setIsAuthenticated(true);
+      } else {
+        setError("Invalid credentials");
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,8 +63,9 @@ const Admin = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="flex items-center justify-center h-12 px-6 w-64 bg-blue-600 mt-8 rounded font-semibold text-sm text-blue-100 hover:bg-blue-700">
-          Login
+        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+        <button className="flex items-center justify-center h-12 px-6 w-64 bg-blue-600 mt-8 rounded font-semibold text-sm text-blue-100 hover:bg-blue-700" type="submit">
+          {loading ? "Loading..." : "Login"}
         </button>
         <Link to="/" className="text-blue-400 hover:text-blue-700 text-center mt-4">Go Back</Link>
       </form>
