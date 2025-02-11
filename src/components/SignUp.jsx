@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 
@@ -8,7 +8,7 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -29,7 +29,7 @@ const SignUp = () => {
       const data = await response.json();
       // Handle successful sign up, e.g., redirect to login page
       console.log('Sign up successful:', data);
-      history.push('/login'); // Redirect to login page
+      navigate('/login'); // Redirect to login page
     } catch (error) {
       console.error('Error signing up:', error);
       setError('Sign up failed. Please try again.');
