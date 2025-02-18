@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const JUDGE0_API_KEY = '1e56935394mshc53fc58227a9182p151a36jsn7c8ed5974db8'; // ⚠ Hardcoded as requested
-
+const JUDGE0_API_KEY = '1e56935394mshc53fc58227a9182p151a36jsn7c8ed5974db8';
 interface Judge0PollResponse {
     stdout?: string; // Plain text output
     stderr?: string; // Plain text error message
