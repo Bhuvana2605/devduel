@@ -7,7 +7,7 @@ export interface CustomRequest extends Request {
     userId?: string; // Add userId as an optional property
 }
 
-// Replace with a secure secret key in production
+
 
 export const Middleware = (roleRequired: "user" | "admin") => {
     return async (req: CustomRequest, res: Response, next: NextFunction) => {
