@@ -18,7 +18,7 @@ export async function submitToJudge0(code: string, languageId: number, stdin?: s
         language_id: languageId,
         source_code: code, // Send plain text, not Base64
         stdin: stdin || "",
-        base64_encoded: false // ✅ Consistent setting
+        base64_encoded: false // Consistent setting
     };
 
     try {
