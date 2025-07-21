@@ -12,7 +12,7 @@ interface Judge0PollResponse {
     };
 }
 
-// 🔹 Submit code to Judge0
+//  Submit code to Judge0
 export async function submitToJudge0(code: string, languageId: number, stdin?: string): Promise<string> {
     const requestData = {
         language_id: languageId,
@@ -45,24 +45,24 @@ export async function submitToJudge0(code: string, languageId: number, stdin?: s
     }
 }
 
-// 🔄 Long polling for results (with exponential backoff)
+//  Long polling for results (with exponential backoff)
 export async function longPollForResults(tokens: string[]) {
     const results = [];
-    const MAX_POLL_ATTEMPTS = 30; // Max attempts
-    const BASE_INTERVAL = 1000; // Start with 1s
-    const BACKOFF_FACTOR = 1.5; // Increase by 1.5x each attempt
+    const MAX_POLL_ATTEMPTS = 30; 
+    const BASE_INTERVAL = 1000; 
+    const BACKOFF_FACTOR = 1.5; 
 
     for (const token of tokens) {
         let result: Judge0PollResponse | null = null;
         let pollAttempts = 0;
 
-        console.log(`⏳ Polling started for token: ${token}`);
+        console.log(`Polling started for token: ${token}`);
 
         do {
             try {
-                console.log(`🔍 Attempt ${pollAttempts + 1} for token: ${token}`);
+                console.log(` Attempt ${pollAttempts + 1} for token: ${token}`);
                 const response = await axios.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
-                    params: { base64_encoded: 'false', fields: '*' }, // ✅ Fixed Base64 inconsistency
+                    params: { base64_encoded: 'false', fields: '*' }, 
                     headers: {
                         'x-rapidapi-key': JUDGE0_API_KEY,
                         'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
@@ -71,16 +71,16 @@ export async function longPollForResults(tokens: string[]) {
 
                 result = response.data as Judge0PollResponse;
 
-                console.log(`✅ Status for ${token}: ${result.status.description}`);
+                console.log(` Status for ${token}: ${result.status.description}`);
 
                 // Log errors from Judge0
                 if (result.stderr) {
-                    console.error(`🚨 Judge0 stderr for token ${token}: ${result.stderr}`);
+                    console.error(` Judge0 stderr for token ${token}: ${result.stderr}`);
                 }
 
                 // Exit if execution is complete (status >= 3)
                 if (result.status.id >= 3) {
-                    console.log(`🎯 Execution completed for token ${token}`);
+                    console.log(` Execution completed for token ${token}`);
                     break;
                 }
 
@@ -88,7 +88,7 @@ export async function longPollForResults(tokens: string[]) {
                 const delay = BASE_INTERVAL * Math.pow(BACKOFF_FACTOR, pollAttempts);
                 await new Promise(resolve => setTimeout(resolve, delay));
             } catch (error) {
-                console.error(`❌ Error polling token ${token}:`, error);
+                console.error(` Error polling token ${token}:`, error);
                 break; // Exit the loop if there's an error
             }
 
@@ -97,7 +97,7 @@ export async function longPollForResults(tokens: string[]) {
 
         // Handle timeout or incomplete results
         if (!result || pollAttempts >= MAX_POLL_ATTEMPTS) {
-            console.error(`⏳ Polling timed out for token ${token}`);
+            console.error(` Polling timed out for token ${token}`);
             results.push({
                 actualOutput: '',
                 errorMessage: 'Polling timed out or failed',
