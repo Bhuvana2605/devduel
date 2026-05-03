@@ -42,13 +42,18 @@ Inspired by platforms like LeetCode,Codeforces,Hackerrank, this project focuses 
 ```bash
 git clone https://github.com/your-username/dev2l.git
 cd devduel
-```bash 
+```
 
 ### Install dependencies
 ```bash
 npm install
-```bash
+```
 
 ### Run the project
+```bash 
 npm run dev
+```
 
+📄 License
+
+This project is for educational purposes.
